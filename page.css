@@ -1,0 +1,59 @@
+:root {
+    --gap: 0.5rem;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body, fieldset {
+    padding: var(--gap); 
+    font-size: 14pt;
+}
+
+body {
+    font-weight: 600;
+    background: #888888;
+    /* Some font nonsense */
+    font-family: 'Courier', monospace;
+    color: #333;
+}
+
+h1, h2, h3, h4, h5, legend, label {
+    color: #000;
+    font-weight: bold;
+}
+
+label:hover, label:has(+ :hover),
+label:has( ~ :nth-child(3):hover),
+label:has( ~ :nth-child(6):hover),
+label:has( ~ :nth-child(9):hover)
+{
+    color: white;
+}
+
+#panel {
+    display: grid;
+    grid-template-columns: 1fr repeat(2, 3fr);
+    grid-template-rows: repeat(1, 1fr);
+    grid-column-gap: var(--gap);
+    grid-row-gap: var(--gap);
+    max-width: 400px;
+}
+
+.fullwidth {
+    min-width: 100%;
+    width: 100;
+}
+
+#output-swatch {
+    min-width: 20vw;
+    min-height: 20vh;
+    width: 20vw;
+    height: 20vw;
+    display: block;
+    border: 1px solid black;
+}
+#output-swatch, #output-text {
+    font-weight: bold;
+    font-size: 1.5em;
+}
+

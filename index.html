@@ -1,0 +1,140 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Color palette stepping</title>
+<script src="new.js" type="text/javascript" defer></script>
+<script src="mapper.js" type="text/javascript" defer></script>
+<link rel="stylesheet" href="page.css"></link>
+</head>
+<body>
+    <div id="content">
+    <h1>Color Box Mapping?</h1>
+    <p>Based on <a href="https://noacubestudio.github.io/blog.html">noa's variation on an earlier technique.</a></p>
+    <h2>Int Values Only</h2>
+    <section id="panel">
+        <label id="h-label" for="h" data-capname="Hue">Hue</label>
+        <input id="h" type="range" step="1" min="0" max="11" value="11"></input>
+        <input id="h-num" type="number" disabled value="11"></input>
+        <label id="s-label" for="s" data-capname="Saturation">Saturation</label>
+        <input id="s" type="range" step="1" min="0" max="9" value="9"></input>
+        <input id="s-num" type="number" disabled value="9"></input>
+        <label id="v-label" for="Value" data-capname="Value">Value</label>
+        <input id="v" type="range" step="1" min="0" max="9" value="9"></input>
+        <input id="v-num" type="number" disabled value="9"></input>
+    </section>
+    
+    <section class="fullwidth">
+        <div id="output-text">( Choose a Color )</div>
+        <div id="output-swatch">( Choose a Color )
+        </div>
+    </section>
+</div>
+</body>
+<script>
+
+let elts = null; /* {
+    panel = {}
+    sliders  = {
+        byId = {},
+        byIndex = [],
+    },
+    swatch = HTMLElement,
+    text = HTMLElement,
+}
+*/
+
+let valueGroups = null; //[
+//     h = float,
+//     s = float,
+//     v = float
+// };
+
+function updateColorDisplay(color = undefined) {
+    if(! color) color = valueGroups;
+    const {h,s,v} = color;
+    const newColor = noaFastColors.getByChannelIndex(
+        valueGroups.h,
+        valueGroups.s,
+        valueGroups.v
+    );
+    const {swatch,text} = elts;
+    swatch.style = `background: ${newColor};`;
+    swatch.innerHTML = `<code>${newColor}</code>`;
+    text.innerHTML = `<code>${newColor}</code>`;
+}
+
+function handleSliders(e) {
+
+    const {target} = e;
+    const {id,type} = target;
+    let sliderId;
+    let numberId;
+    // if(type == 'range') then {
+        sliderId = id; 
+        numberId = `${id}-num`;
+    // } else if (type == 'number') {
+    //     numberId = id;
+    //     sliderId = id.substring(0,1);
+    // }
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    const sliderRow = elts.sliders.byId[sliderId];
+    const {value} = e.target;
+    sliderRow.number.value = value;
+    valueGroups[sliderId] = value;
+    console.log("ee", valueGroups);
+
+    updateColorDisplay();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    valueGroups = {}
+    elts = {
+        sliders : null,
+        swatch : document.getElementById('output-swatch'),
+        text   : document.getElementById('output-text'),
+        panel  : document.getElementById('panel')
+    };
+    elts.sliders = {
+        byId : {},
+        byIndex : []
+    };
+    const {panel,  sliders} = elts;
+    const {byIndex,   byId} = sliders;
+    console.log(panel, sliders, byIndex, byId);
+    // Not a table b/c mobile
+    let i = 0;
+    panel.querySelectorAll('input[type="range"]').forEach((sliderElt) => {
+        console.log(i, sliderElt);
+        if(sliderElt.type != 'range') {
+            console.log("problem", sliderElt);
+            return;
+        }
+        const sliderId  = sliderElt.id;
+        const numberElt = panel.querySelector(`#${sliderId}-num`);
+        const labelElt  = panel.querySelector(`#${sliderId}-label`);
+        console.log("l", labelElt)
+        const startValue = sliderElt.value;
+
+        valueGroups[sliderId] = startValue;
+        console.log(`Set valueGroups.${sliderId} = ${startValue}`);
+
+        const rowObject = {
+           name       : labelElt.innerHTML,
+           label      : labelElt,
+           slider     : sliderElt,
+           ['number'] : numberElt, 
+        };
+        console.log(rowObject);
+        byIndex.push(rowObject);
+        byId[sliderId] = rowObject;
+        i++;
+    });
+    for(const eventName of ['change', 'input']) {
+        panel.addEventListener(eventName, handleSliders);
+    }
+    updateColorDisplay();
+});
+</script>
+</html>

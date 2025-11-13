@@ -25,8 +25,7 @@
     </section>
     
     <section class="fullwidth">
-        <div id="output-text">( Choose a Color )</div>
-        <div id="output-swatch">( Choose a Color )
+        <div id="output-swatch"><code></code>
         </div>
     </section>
 </div>
@@ -40,28 +39,35 @@ let elts = null; /* {
         byIndex = [],
     },
     swatch = HTMLElement,
-    text = HTMLElement,
 }
 */
 
-let valueGroups = null; //[
-//     h = float,
-//     s = float,
-//     v = float
-// };
+let valueGroups = null;
+
 
 function updateColorDisplay(color = undefined) {
     if(! color) color = valueGroups;
     const {h,s,v} = color;
     const newColor = noaFastColors.getByChannelIndex(
-        valueGroups.h,
-        valueGroups.s,
-        valueGroups.v
+        h, s, v
     );
-    const {swatch,text} = elts;
-    swatch.style = `background: ${newColor};`;
-    swatch.innerHTML = `<code>${newColor}</code>`;
-    text.innerHTML = `<code>${newColor}</code>`;
+    const hOpposite = (h + 6) % 12;
+    const sOpposite = (s + 5) % 10;
+    // Push a little extra bit away from the start
+    let vOpposite = 9 - (1.25 * (v - 5));
+    // Skip modulo to avoid muddy same index
+    vOpposite = Math.max(0, Math.min(vOpposite, 9));
+
+    const codeColor = noaFastColors.getByChannelIndex(
+        hOpposite, sOpposite, vOpposite);
+
+    const {swatch} = elts;
+    const codeNode = swatch.querySelector("code");
+    codeNode.style = `color: ${codeColor} !important;`;
+    codeNode.innerHTML = newColor;
+    console.log({newColor, codeColor});
+    swatch.replaceChildren(codeNode);
+    swatch.style = `background: ${newColor}; border 1px solid ${codeColor};`;
 }
 
 function handleSliders(e) {
@@ -93,7 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
     elts = {
         sliders : null,
         swatch : document.getElementById('output-swatch'),
-        text   : document.getElementById('output-text'),
         panel  : document.getElementById('panel')
     };
     elts.sliders = {
